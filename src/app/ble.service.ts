@@ -176,6 +176,10 @@ export class BleService {
     this.state$.next(state);
   }
 
+  async disconnect() {
+    this.server.disconnect();
+  }
+
   async startRide() {
     const data = Uint8Array.of(1);
 
