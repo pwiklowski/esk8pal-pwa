@@ -41,8 +41,11 @@ export class BleService {
   server: BluetoothRemoteGATTServer;
   services: Array<BluetoothRemoteGATTService>;
 
+  state: CurrentState;
   state$ = new Subject<CurrentState>();
   connected$ = new BehaviorSubject<boolean>(false);
+
+  interval;
 
   CHAR_STATE = '0000fd01-0000-1000-8000-00805f9b34fb';
 
@@ -109,9 +112,28 @@ export class BleService {
       this.onDisconnected.bind(this)
     );
     this.connected$.next(true);
-    await this.observerState();
 
     await this.getServices();
+
+    this.refreshState();
+  }
+
+  refreshState() {
+    this.readState();
+    clearTimeout(this.interval);
+    if (this.server.connected) {
+      this.interval = setTimeout(() => {
+        this.refreshState();
+      }, this.getReadInterval());
+    }
+  }
+
+  getReadInterval() {
+    if (this.state?.riding_state == DeviceState.STATE_RIDING) {
+      return 1000;
+    } else {
+      return 3000;
+    }
   }
 
   onDisconnected() {
@@ -131,48 +153,55 @@ export class BleService {
   }
 
   async stateUpdateHandler({ target }) {
-    let state: CurrentState = {};
+    console.log(target.uuid, target.service.uuid, target.value.byteLength);
     const value: DataView = target.value;
+    this.handleStateData(value);
+  }
 
+  handleStateData(value) {
+    let state: CurrentState = {};
     let offset = 0;
+    try {
+      state.current = value.getFloat64(offset, true);
+      offset += 8;
 
-    state.current = value.getFloat64(offset, true);
-    offset += 8;
+      state.voltage = value.getFloat64(offset, true);
+      offset += 8;
+      state.used_energy = value.getFloat64(offset, true);
+      offset += 8;
+      state.total_energy = value.getFloat64(offset, true);
+      offset += 8;
 
-    state.voltage = value.getFloat64(offset, true);
-    offset += 8;
-    state.used_energy = value.getFloat64(offset, true);
-    offset += 8;
-    state.total_energy = value.getFloat64(offset, true);
-    offset += 8;
+      state.speed = value.getFloat64(offset, true);
+      offset += 8;
+      (state.latitude = value.getFloat64(offset)), true;
+      offset += 8;
+      (state.longitude = value.getFloat64(offset)), true;
+      offset += 8;
+      state.trip_distance = value.getFloat64(offset, true);
+      offset += 8;
+      state.altitude = value.getFloat64(offset, true);
+      offset += 8;
 
-    state.speed = value.getFloat64(offset, true);
-    offset += 8;
-    (state.latitude = value.getFloat64(offset)), true;
-    offset += 8;
-    (state.longitude = value.getFloat64(offset)), true;
-    offset += 8;
-    state.trip_distance = value.getFloat64(offset, true);
-    offset += 8;
-    state.altitude = value.getFloat64(offset, true);
-    offset += 8;
+      state.riding_time = value.getUint32(offset, true);
+      offset += 4;
 
-    state.riding_time = value.getUint32(offset, true);
-    offset += 4;
+      state.gps_fix_status = value.getUint8(offset);
+      offset += 1;
+      state.gps_satelites_count = value.getUint8(offset);
+      offset += 1;
 
-    state.gps_fix_status = value.getUint8(offset);
-    offset += 1;
-    state.gps_satelites_count = value.getUint8(offset);
-    offset += 1;
+      state.riding_state = value.getUint8(offset);
+      offset += 1;
 
-    state.riding_state = value.getUint8(offset);
-    offset += 1;
-
-    state.free_storage = value.getUint32(offset, true);
-    offset += 4;
-    state.total_storage = value.getUint32(offset, true);
-    offset += 4;
-
+      state.free_storage = value.getUint32(offset, true);
+      offset += 4;
+      state.total_storage = value.getUint32(offset, true);
+      offset += 4;
+    } catch (e) {
+      console.error(e);
+    }
+    this.state = state;
     this.state$.next(state);
   }
 
@@ -198,6 +227,8 @@ export class BleService {
         this.CHAR_RIDE_STATE
       )
     ).writeValue(data);
+
+    this.refreshState();
   }
 
   async getServices() {
@@ -245,6 +276,6 @@ export class BleService {
 
   async readState() {
     const state = await this.readValue(this.SERVICE_STATE, this.CHAR_APP_STATE);
-    console.log(state);
+    this.handleStateData(state);
   }
 }
