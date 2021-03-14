@@ -47,14 +47,12 @@ export class BleService {
 
   interval;
 
-  CHAR_STATE = '0000fd01-0000-1000-8000-00805f9b34fb';
-
   CHAR_VOLTAGE = '0000ff01-0000-1000-8000-00805f9b34fb';
   CHAR_CURRENT = '0000ff02-0000-1000-8000-00805f9b34fb';
   CHAR_USED_ENERGY = '0000ff03-0000-1000-8000-00805f9b34fb';
   CHAR_TOTAL_ENERGY = '0000ff04-0000-1000-8000-00805f9b34fb';
 
-  CHAR_APP_STATE = '0000ffff-0000-1000-8000-00805f9b34fb';
+  CHAR_APP_STATE = '0000ff01-0000-1000-8000-00805f9b34fb';
 
   CHAR_LATITUDE = '0000fe01-0000-1000-8000-00805f9b34fb';
   CHAR_LONGITUDE = '0000fe02-0000-1000-8000-00805f9b34fb';
@@ -75,20 +73,41 @@ export class BleService {
 
   CHAR_TIME = '0000fd08-0000-1000-8000-00805f9b34fb';
 
-  SERVICE_STATE = '000000ff-0000-1000-8000-00805f9b34fb';
+  SERVICE_BATTERY = '000000ff-0000-1000-8000-00805f9b34fb';
+  SERVICE_LOCATION = '000000fe-0000-1000-8000-00805f9b34fb';
+  SERVICE_SETTINGS = '000000fd-0000-1000-8000-00805f9b34fb';
+  SERVICE_STATE = '000000fc-0000-1000-8000-00805f9b34fb';
 
-  s = [0x000fc, 0x00fd, 0x00fe, 0x00ff];
+  async init() {
+    let devices = await navigator.bluetooth.getDevices();
+    console.log('init', devices);
+    if (devices.length > 0) {
+      const device = devices[0];
+      device.addEventListener('advertisementreceived', (event: any) => {
+        console.log('  Device Name: ' + event.device.name);
+        console.log('  RSSI: ' + event.rssi);
+        console.log(event.manufacturerData);
+        console.log(event.serviceData);
+      });
 
-  async init() {}
-
-  onAdvertismentReceived() {
-    console.log('adv');
+      console.log('Watching advertisements from "' + device.name + '"...');
+      //await device.watchAdvertisements();
+    }
   }
 
   async scanAndConnect() {
     const device = await navigator.bluetooth.requestDevice({
-      acceptAllDevices: true,
-      optionalServices: this.s,
+      filters: [
+        {
+          name: 'esk8-logger',
+        },
+      ],
+      optionalServices: [
+        this.SERVICE_BATTERY,
+        this.SERVICE_LOCATION,
+        this.SERVICE_SETTINGS,
+        this.SERVICE_STATE,
+      ],
     });
 
     this.connect(device);
@@ -142,7 +161,7 @@ export class BleService {
   }
 
   async observerState() {
-    const service = await this.server.getPrimaryService(0x00ff);
+    const service = await this.server.getPrimaryService(this.SERVICE_STATE);
     const char = await service.getCharacteristic(this.CHAR_APP_STATE);
     const sub = await char.startNotifications();
 
@@ -213,9 +232,9 @@ export class BleService {
     const data = Uint8Array.of(1);
 
     await (
-      await (await this.server.getPrimaryService(0x00fd)).getCharacteristic(
-        this.CHAR_RIDE_STATE
-      )
+      await (
+        await this.server.getPrimaryService(this.SERVICE_SETTINGS)
+      ).getCharacteristic(this.CHAR_RIDE_STATE)
     ).writeValue(data);
   }
 
@@ -223,9 +242,9 @@ export class BleService {
     const data = Uint8Array.of(0);
 
     await (
-      await (await this.server.getPrimaryService(0x00fd)).getCharacteristic(
-        this.CHAR_RIDE_STATE
-      )
+      await (
+        await this.server.getPrimaryService(this.SERVICE_SETTINGS)
+      ).getCharacteristic(this.CHAR_RIDE_STATE)
     ).writeValue(data);
 
     this.refreshState();

@@ -29,6 +29,10 @@ export class AppComponent {
     );
   }
 
+  async ngOnInit() {
+    await this.bleService.init();
+  }
+
   async readState() {
     await this.bleService.readState();
   }
