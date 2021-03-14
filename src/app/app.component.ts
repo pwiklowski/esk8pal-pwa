@@ -12,8 +12,6 @@ export class AppComponent {
   connected: boolean;
 
   constructor(public bleService: BleService) {
-    this.bleService.connectToDevice();
-
     this.bleService.state$.subscribe(
       (state: CurrentState) => {
         this.state = JSON.stringify(state, null, 2);
