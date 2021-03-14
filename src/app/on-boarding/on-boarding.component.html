@@ -1,0 +1,9 @@
+<div>{{ connected }}</div>
+
+<div>Is paired ?</div>
+
+<div>
+  <button (click)="bleService.scanAndConnect()">scan</button>
+  <button (click)="bleService.connectToDevice()">connect</button>
+  <button (click)="bleService.disconnect()">disconnect</button>
+</div>

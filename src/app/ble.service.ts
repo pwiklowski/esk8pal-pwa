@@ -95,6 +95,12 @@ export class BleService {
     }
   }
 
+  async isPaired() {
+    let devices = await navigator.bluetooth.getDevices();
+    console.log('init', devices);
+    return devices.length;
+  }
+
   async scanAndConnect() {
     const device = await navigator.bluetooth.requestDevice({
       filters: [
@@ -130,11 +136,10 @@ export class BleService {
       'gattserverdisconnected',
       this.onDisconnected.bind(this)
     );
+    this.refreshState();
     this.connected$.next(true);
 
     await this.getServices();
-
-    this.refreshState();
   }
 
   refreshState() {

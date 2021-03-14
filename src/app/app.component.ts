@@ -1,5 +1,6 @@
 import { BleService, CurrentState } from './ble.service';
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-root',
@@ -11,27 +12,21 @@ export class AppComponent {
   state: string;
   connected: boolean;
 
-  constructor(public bleService: BleService) {
-    this.bleService.state$.subscribe(
-      (state: CurrentState) => {
-        this.state = JSON.stringify(state, null, 2);
-      },
-      () => {}
-    );
-
+  constructor(public bleService: BleService, private router: Router) {
     this.bleService.connected$.subscribe(
       (connected: boolean) => {
-        this.connected = connected;
+        if (connected) {
+          this.router.navigate(['/state']);
+        } else {
+          this.router.navigate(['/']);
+        }
       },
       () => {}
     );
+    ``;
   }
 
   async ngOnInit() {
     await this.bleService.init();
-  }
-
-  async readState() {
-    await this.bleService.readState();
   }
 }
