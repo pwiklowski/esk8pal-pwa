@@ -7,12 +7,12 @@ import { BleService, CurrentState } from '../ble.service';
   styleUrls: ['./current-state.component.scss'],
 })
 export class CurrentStateComponent implements OnInit {
-  state;
+  state: CurrentState;
 
   constructor(public bleService: BleService) {
     this.bleService.state$.subscribe(
       (state: CurrentState) => {
-        this.state = JSON.stringify(state, null, 2);
+        this.state = state;
       },
       () => {}
     );

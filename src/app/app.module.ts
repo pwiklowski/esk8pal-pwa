@@ -1,3 +1,4 @@
+import { MapComponent } from './map/map.component';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 
@@ -13,12 +14,7 @@ import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import { MatButtonModule } from '@angular/material/button';
 
 @NgModule({
-  declarations: [
-    AppComponent,
-    OnBoardingComponent,
-    CurrentStateComponent,
-    SettingsComponent,
-  ],
+  declarations: [AppComponent, OnBoardingComponent, CurrentStateComponent, SettingsComponent, MapComponent],
   imports: [
     BrowserModule,
     AppRoutingModule,

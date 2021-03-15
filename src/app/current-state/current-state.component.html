@@ -1,10 +1,22 @@
-<textarea style="margin: 0px; width: 420px; height: 397px">{{
-  state
-}}</textarea>
+<app-map></app-map>
 
-<button (click)="bleService.readState()">read</button>
-<br />
+<div class="panel">
+  <div>Voltage: {{ state?.voltage | number }} V</div>
+  <div>Current: {{ state?.current | number }} A</div>
 
-<button (click)="bleService.startRide()">start</button>
-<button (click)="bleService.stopRide()">stop</button>
-<button (click)="bleService.disconnect()">disconnect</button>
+  <div>Used energy {{ state?.used_energy | number }} mAh / {{ state?.total_energy | number }} mAh</div>
+
+  <div>Speed {{ state?.speed | number }} km/h</div>
+
+  <div>Lat: {{ state?.latitude }} Lon : {{ state?.longitude }}</div>
+
+  <div>Distance: {{ state?.trip_distance }} Riding time: {{ state?.riding_time }}</div>
+
+  <div>Fix: {{ state?.gps_fix_status }} Satelites:{{ state?.gps_satelites_count }}</div>
+
+  <div>State: {{ state?.riding_state }}</div>
+
+  <button mat-raised-button color="primary" (click)="bleService.startRide()">start</button>
+  <button mat-raised-button color="primary" (click)="bleService.stopRide()">stop</button>
+  <button mat-raised-button color="primary" (click)="bleService.disconnect()">disconnect</button>
+</div>
