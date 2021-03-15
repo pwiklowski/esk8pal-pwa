@@ -103,17 +103,8 @@ export class BleService {
 
   async scanAndConnect() {
     const device = await navigator.bluetooth.requestDevice({
-      filters: [
-        {
-          name: 'esk8-logger',
-        },
-      ],
-      optionalServices: [
-        this.SERVICE_BATTERY,
-        this.SERVICE_LOCATION,
-        this.SERVICE_SETTINGS,
-        this.SERVICE_STATE,
-      ],
+      filters: [{ name: 'esk8-logger' }],
+      optionalServices: [this.SERVICE_BATTERY, this.SERVICE_LOCATION, this.SERVICE_SETTINGS, this.SERVICE_STATE],
     });
 
     this.connect(device);
@@ -132,10 +123,7 @@ export class BleService {
 
     console.log('Connecting to GATT Server...', this.device);
     this.server = await this.device.gatt.connect();
-    this.device.addEventListener(
-      'gattserverdisconnected',
-      this.onDisconnected.bind(this)
-    );
+    this.device.addEventListener('gattserverdisconnected', this.onDisconnected.bind(this));
     this.refreshState();
     this.connected$.next(true);
 
@@ -170,10 +158,7 @@ export class BleService {
     const char = await service.getCharacteristic(this.CHAR_APP_STATE);
     const sub = await char.startNotifications();
 
-    sub.addEventListener(
-      'characteristicvaluechanged',
-      this.stateUpdateHandler.bind(this)
-    );
+    sub.addEventListener('characteristicvaluechanged', this.stateUpdateHandler.bind(this));
   }
 
   async stateUpdateHandler({ target }) {
@@ -237,9 +222,7 @@ export class BleService {
     const data = Uint8Array.of(1);
 
     await (
-      await (
-        await this.server.getPrimaryService(this.SERVICE_SETTINGS)
-      ).getCharacteristic(this.CHAR_RIDE_STATE)
+      await (await this.server.getPrimaryService(this.SERVICE_SETTINGS)).getCharacteristic(this.CHAR_RIDE_STATE)
     ).writeValue(data);
   }
 
@@ -247,9 +230,7 @@ export class BleService {
     const data = Uint8Array.of(0);
 
     await (
-      await (
-        await this.server.getPrimaryService(this.SERVICE_SETTINGS)
-      ).getCharacteristic(this.CHAR_RIDE_STATE)
+      await (await this.server.getPrimaryService(this.SERVICE_SETTINGS)).getCharacteristic(this.CHAR_RIDE_STATE)
     ).writeValue(data);
 
     this.refreshState();
@@ -270,12 +251,7 @@ export class BleService {
 
       characteristics.forEach(async (characteristic) => {
         //const value = await characteristic.readValue();
-        console.log(
-          '>> Characteristic: ' +
-            characteristic.uuid +
-            ' ' +
-            this.getSupportedProperties(characteristic)
-        );
+        console.log('>> Characteristic: ' + characteristic.uuid + ' ' + this.getSupportedProperties(characteristic));
       });
     });
   }
