@@ -9,6 +9,7 @@ import { BleService } from '../ble.service';
 export class OnBoardingComponent {
   state: string;
   connected: boolean;
+  isPaired: boolean;
   isDiscoverable: boolean;
 
   constructor(public bleService: BleService) {
@@ -26,5 +27,8 @@ export class OnBoardingComponent {
       () => {}
     );
   }
+
+  async ngOnInit() {
+    this.isPaired = await this.bleService.isPaired();
   }
 }

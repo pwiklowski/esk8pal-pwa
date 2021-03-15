@@ -114,8 +114,7 @@ export class BleService {
 
   async isPaired() {
     let devices = await navigator.bluetooth.getDevices();
-    console.log('init', devices);
-    return devices.length;
+    return devices.length > 0;
   }
 
   async scanAndConnect() {

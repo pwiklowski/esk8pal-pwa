@@ -1,10 +1,6 @@
-<div>{{ connected }}</div>
 {{ isDiscoverable }}
 
-<div>Is paired ?</div>
-
-<div>
-  <button (click)="bleService.scanAndConnect()">scan</button>
-  <button (click)="bleService.connectToDevice()">connect</button>
-  <button (click)="bleService.disconnect()">disconnect</button>
-</div>
+<button mat-stroked-button color="primary" (click)="bleService.scanAndConnect()">scan and connect</button>
+<button mat-stroked-button color="primary" *ngIf="isPaired" (click)="bleService.connectToDevice()">
+  connect to paired
+</button>
