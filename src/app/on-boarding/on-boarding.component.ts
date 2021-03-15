@@ -9,6 +9,7 @@ import { BleService } from '../ble.service';
 export class OnBoardingComponent {
   state: string;
   connected: boolean;
+  isDiscoverable: boolean;
 
   constructor(public bleService: BleService) {
     this.bleService.connected$.subscribe(
@@ -17,5 +18,13 @@ export class OnBoardingComponent {
       },
       () => {}
     );
+
+    this.bleService.isDiscoverable$.subscribe(
+      (isDiscoverable: boolean) => {
+        this.isDiscoverable = isDiscoverable;
+      },
+      () => {}
+    );
+  }
   }
 }

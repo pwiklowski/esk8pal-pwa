@@ -44,6 +44,11 @@ export class BleService {
   state: CurrentState;
   state$ = new Subject<CurrentState>();
   connected$ = new BehaviorSubject<boolean>(false);
+  isDiscoverable$ = new BehaviorSubject<boolean>(false);
+  abortController = new AbortController();
+
+  DEVICE_LOSS_TIMEOUT = 5000;
+  deviceLossTimout;
 
   interval;
 
@@ -83,16 +88,28 @@ export class BleService {
     console.log('init', devices);
     if (devices.length > 0) {
       const device = devices[0];
-      device.addEventListener('advertisementreceived', (event: any) => {
-        console.log('  Device Name: ' + event.device.name);
-        console.log('  RSSI: ' + event.rssi);
-        console.log(event.manufacturerData);
-        console.log(event.serviceData);
-      });
-
-      console.log('Watching advertisements from "' + device.name + '"...');
-      //await device.watchAdvertisements();
+      await this.watchForAdvertisments(device);
     }
+  }
+
+  async watchForAdvertisments(device) {
+    this.abortController = new AbortController();
+    device.addEventListener('advertisementreceived', this.advertismentReceived.bind(this));
+    await device.watchAdvertisements({ signal: this.abortController.signal });
+  }
+  async unwatchForAdvertisments() {
+    this.device.removeEventListener('advertisementreceived', this.advertismentReceived.bind(this));
+    this.abortController.abort();
+  }
+
+  async advertismentReceived(event: any) {
+    console.log('Device Name: ' + event.device.name);
+    this.isDiscoverable$.next(true);
+
+    clearInterval(this.deviceLossTimout);
+    this.deviceLossTimout = setTimeout(() => {
+      this.isDiscoverable$.next(false);
+    }, this.DEVICE_LOSS_TIMEOUT);
   }
 
   async isPaired() {
@@ -120,6 +137,8 @@ export class BleService {
 
   async connect(device) {
     this.device = device;
+
+    this.unwatchForAdvertisments();
 
     console.log('Connecting to GATT Server...', this.device);
     this.server = await this.device.gatt.connect();
@@ -151,6 +170,7 @@ export class BleService {
   onDisconnected() {
     console.log('on disconnected');
     this.connected$.next(false);
+    this.init();
   }
 
   async observerState() {
