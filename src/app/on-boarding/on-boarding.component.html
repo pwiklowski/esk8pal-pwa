@@ -1,6 +1,9 @@
-{{ isDiscoverable }}
+<div class="menu">
+  {{ isDiscoverable }}
 
-<button mat-stroked-button color="primary" (click)="bleService.scanAndConnect()">scan and connect</button>
-<button mat-stroked-button color="primary" *ngIf="isPaired" (click)="bleService.connectToDevice()">
-  connect to paired
-</button>
+  <img width="224" height="224" src="assets/skateboard.svg" alt="Skateboard" title="Skateboard" class="loaded" />
+  <div class="app-name">esk8pal</div>
+
+  <button mat-flat-button (click)="bleService.scanAndConnect()">scan and connect</button>
+  <button mat-flat-button *ngIf="isPaired" (click)="bleService.connectToDevice()">connect to paired</button>
+</div>
