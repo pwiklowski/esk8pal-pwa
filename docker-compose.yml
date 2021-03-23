@@ -1,0 +1,19 @@
+version: "2"
+
+services:
+  frontend:
+    restart: always
+    build:
+      context: .
+      dockerfile: Dockerfile
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.app-esk8pal.rule=Host(`app.esk8pal.wiklosoft.com`)"
+      - "traefik.http.services.app-esk8pal.loadbalancer.server.port=80"
+      - "traefik.http.routers.app-esk8pal.entrypoints=websecure"
+      - "traefik.http.routers.app-esk8pal.tls.certresolver=myresolver"
+
+networks:
+  default:
+    external:
+      name: pwiklowski_default
