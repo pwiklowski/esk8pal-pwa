@@ -4,6 +4,16 @@ This respository contains companion app for esk8pal (https://github.com/pwiklows
 
 For more informations about Web Bluetooth API go to: https://github.com/WebBluetoothCG/web-bluetooth
 
+
+For other repositories from esk8pal project go to:
+
+- Frontend Angular Appplication - https://github.com/pwiklowski/esk8pal-web-be
+- Backend service - https://github.com/pwiklowski/esk8pal-web-be
+- Power module PCB - https://github.com/pwiklowski/esk8pal-power-module
+- ESP32 Firmware - https://github.com/pwiklowski/esk8pal-device
+- Android application - https://github.com/pwiklowski/esk8pal-android
+
+
 ## Development server
 
 Run `ng serve` for a dev server. Navigate to `http://localhost:4200/`. The app will automatically reload if you change any of the source files.
